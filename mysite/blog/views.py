@@ -25,7 +25,7 @@ def post_comment(request, post_id):
         comment = form.save(commit=False)
         comment.post = post
         comment.save()
-    return render(request, 'blog/post/comment.html', {'post': post, 'form': form, 'comment': comment})
+    return render(request, 'blog/posts/comment.html', {'post': post, 'form': form, 'comment': comment})
 
 class PostListView(ListView):
     queryset = Post.objects.filter(status=Post.Status.PUBLISHED).all()
