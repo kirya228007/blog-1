@@ -2,6 +2,11 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from .models import Post
 from  django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.views.generic import ListView
+from .models import Post, Comment
+from .forms import CommentForm
+from django.views.decorators.http import require_POST
+
 
 # Create your views here.
 def index(request):
@@ -10,6 +15,23 @@ def index(request):
 
 def hello(request):
     return HttpResponse('Hello world!')
+
+@require_POST
+def post_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id, status=Post.Status.PUBLISHED)
+    comment = True
+    form = CommentForm(data=request.POST)
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.post = post
+        comment.save()
+    return render(request, 'blog/post/comment.html', {'post': post, 'form': form, 'comment': comment})
+
+class PostListView(ListView):
+    queryset = Post.objects.filter(status=Post.Status.PUBLISHED).all()
+    context_object_name = 'posts'
+    paginate_by = 3
+    template_name = 'blog/posts/list.html'
 
 def post_list(request):
     posts_list = Post.objects.filter(status=Post.Status.PUBLISHED).all()
